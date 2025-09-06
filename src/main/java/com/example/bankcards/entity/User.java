@@ -49,4 +49,8 @@ public class User {
         if (this.id == null) this.id = UUID.randomUUID();
         if (this.createdAt == null) this.createdAt = Instant.now();
     }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
 }
