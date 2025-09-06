@@ -1,6 +1,7 @@
 package com.example.bankcards.security;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,8 @@ public class JwtProvider {
     private String jwtIssuer;
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(String username) {

@@ -31,5 +31,5 @@ logging:
 
 jwt:
   issuer: bank-rest
-  secret: ${JWT_SECRET:.env}
+  secret: ff1d94bb2f2ccda614c28ec6a777fdae545e9cf52027fda710381ee5791658f0
   expiry-seconds: 3600
