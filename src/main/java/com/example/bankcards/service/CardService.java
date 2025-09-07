@@ -50,6 +50,11 @@ public class CardService {
         return cardRepo.findAllByUser(user, pageable);
     }
 
+    public Page<Card> getCardsByStatus(CardStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("expiry").descending());
+        return cardRepo.findAllByStatus(status, pageable);
+    }
+
     public Card updateCard(Card card) {
         return cardRepo.save(card);
     }
