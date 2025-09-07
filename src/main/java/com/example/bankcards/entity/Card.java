@@ -3,6 +3,7 @@ package com.example.bankcards.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -22,8 +23,9 @@ public class Card {
     @Column(name = "number", nullable = false, length = 19)
     private String number;
 
-    @Column(name = "owner", nullable = false, length = 64)
-    private String owner;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "expiry", nullable = false)
     private LocalDate expiry;
@@ -33,13 +35,19 @@ public class Card {
     private CardStatus status;
 
     @Column(name = "balance", nullable = false)
-    private Double balance;
+    private BigDecimal balance;
+
+    @Column(name = "last4", nullable = false)
+    private String last4;
 
     @PrePersist
     public void prePersist() {
         if (id == null) id = UUID.randomUUID();
-        if (balance == null) balance = 0.0;
+        if (balance == null) balance = BigDecimal.valueOf(0.0);
         if (status == null) status = CardStatus.ACTIVE;
+        if (last4 == null && number != null && number.length() >= 4) {
+            last4 = number.substring(number.length() - 4);
+        }
     }
 
     public String getMaskedNumber() {

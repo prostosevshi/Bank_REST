@@ -1,9 +1,11 @@
 package com.example.bankcards.controller;
 
+import com.example.bankcards.dto.CardRequest;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.service.CardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +22,7 @@ public class CardController {
     public Page<Card> getMyCards(@RequestParam(defaultValue = "0") int page,
                                  @RequestParam(defaultValue = "10") int size) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return cardService.getCardsByOwner(username, page, size);
+        return cardService.getCardsByUser(username, page, size);
     }
 
     @GetMapping("/{id}")
@@ -29,7 +31,8 @@ public class CardController {
     }
 
     @PostMapping
-    public Card createCard(@RequestBody Card card) {
-        return cardService.createCard(card);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public Card createCard(@RequestBody CardRequest request) {
+        return cardService.createCard(request);
     }
 }
