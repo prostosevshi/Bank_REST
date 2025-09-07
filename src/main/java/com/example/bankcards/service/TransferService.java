@@ -1,5 +1,6 @@
 package com.example.bankcards.service;
 
+import com.example.bankcards.dto.TransferResponse;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.CardStatus;
 import com.example.bankcards.entity.Transfer;
@@ -20,7 +21,7 @@ public class TransferService {
     private final TransferRepo transferRepo;
 
     @Transactional
-    public Transfer transfer(UUID fromCardId, UUID toCardId, BigDecimal amount, String username) {
+    public TransferResponse transfer(UUID fromCardId, UUID toCardId, BigDecimal amount, String username) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new RuntimeException("amount must be greater than zero");
 
         Card fromCard = cardRepo.findById(fromCardId)
@@ -35,6 +36,10 @@ public class TransferService {
 
         if (!fromCard.getUser().getUsername().equals(username)) {
             throw new RuntimeException("You can only transfer from your own card");
+        }
+
+        if (fromCardId.equals(toCardId)) {
+            throw new RuntimeException("Cannot transfer to the same card");
         }
 
         if (fromCard.getBalance().compareTo(amount) < 0) {
@@ -53,6 +58,13 @@ public class TransferService {
                 .amount(amount)
                 .build();
 
-        return transferRepo.save(transfer);
+        Transfer savedTransfer = transferRepo.save(transfer);
+
+        return new TransferResponse(
+                savedTransfer.getId(),
+                fromCard.getId(),
+                toCard.getId(),
+                savedTransfer.getAmount()
+        );
     }
 }

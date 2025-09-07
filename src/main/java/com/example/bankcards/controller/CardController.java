@@ -5,6 +5,7 @@ import com.example.bankcards.dto.CardResponse;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.CardStatus;
 import com.example.bankcards.service.CardService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,7 +45,7 @@ public class CardController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public CardResponse createCard(@RequestBody CardRequest request) {
+    public CardResponse createCard(@RequestBody @Valid CardRequest request) {
         return CardResponse.fromEntity(cardService.createCard(request));
     }
 
