@@ -8,6 +8,8 @@ import com.example.bankcards.entity.User;
 import com.example.bankcards.repository.RoleRepo;
 import com.example.bankcards.repository.UserRepo;
 import com.example.bankcards.security.JwtProvider;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Endpoints for user login and registration")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -28,6 +31,10 @@ public class AuthController {
     private final RoleRepo roleRepo;
     private final PasswordEncoder passwordEncoder;
 
+    @Operation(
+            summary = "Authenticate user and generate JWT",
+            description = "Accepts username and password, verifies credentials, and returns a JWT token for authorized access."
+    )
     @PostMapping("login")
     public AuthResponse login(@RequestBody LoginRequest request) {
         var authentication = authenticationManager.authenticate(
@@ -37,6 +44,10 @@ public class AuthController {
         return new AuthResponse(token);
     }
 
+    @Operation(
+            summary = "Register a new user",
+            description = "Creates a new user account with a username, password, and role. Returns user details without password."
+    )
     @PostMapping("register")
     public String register(@RequestBody RegisterRequest request) {
         if (userRepo.findByUsername(request.getUsername()).isPresent()) {
