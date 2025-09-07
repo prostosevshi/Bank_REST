@@ -14,4 +14,6 @@ public interface CardRepo extends JpaRepository<Card, UUID> {
     Page<Card> findAllByUser(User user, Pageable pageable);
 
     Page<Card> findAllByStatus(CardStatus status, Pageable pageable);
+
+    Page<Card> findAllByUserAndStatusNot(User user, CardStatus status, Pageable pageable);
 }

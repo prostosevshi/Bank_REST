@@ -38,7 +38,14 @@ public class CardService {
     }
 
     public Card getCard(UUID id) {
-        return cardRepo.findById(id).orElseThrow(() -> new RuntimeException("Card not found"));
+        Card card = cardRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        if (card.getStatus() == CardStatus.DELETED) {
+            throw new RuntimeException("Card is deleted");
+        }
+
+        return card;
     }
 
     public Page<Card> getCardsByUser(String username, int page, int size) {
@@ -47,7 +54,7 @@ public class CardService {
         User user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return cardRepo.findAllByUser(user, pageable);
+        return cardRepo.findAllByUserAndStatusNot(user, CardStatus.DELETED, pageable);
     }
 
     public Page<Card> getCardsByStatus(CardStatus status, int page, int size) {
@@ -60,7 +67,9 @@ public class CardService {
     }
 
     public void deleteCard(UUID id) {
-        cardRepo.deleteById(id);
+        Card card = getCard(id);
+        card.setStatus(CardStatus.DELETED);
+        cardRepo.save(card);
     }
 
     public void blockCard(UUID id) {

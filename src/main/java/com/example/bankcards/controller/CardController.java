@@ -74,4 +74,10 @@ public class CardController {
         cardService.blockCard(id);
         return CardResponse.fromEntity(cardService.getCard(id));
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void deleteCard(@PathVariable("id") UUID id) {
+        cardService.deleteCard(id);
+    }
 }
