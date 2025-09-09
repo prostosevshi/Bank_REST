@@ -70,4 +70,43 @@ class CardServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class, () -> cardService.createCard(request));
         assertEquals("User not found", ex.getMessage());
     }
+
+    @Test
+    void blockCard_success() {
+        Card card = new Card();
+        card.setId(UUID.randomUUID());
+        card.setStatus(CardStatus.ACTIVE);
+        when(cardRepo.findById(card.getId())).thenReturn(Optional.of(card));
+        when(cardRepo.save(card)).thenAnswer(i -> i.getArgument(0));
+
+        cardService.blockCard(card.getId());
+
+        assertEquals(CardStatus.BLOCKED, card.getStatus());
+    }
+
+    @Test
+    void activateCard_success() {
+        Card card = new Card();
+        card.setId(UUID.randomUUID());
+        card.setStatus(CardStatus.BLOCKED);
+        when(cardRepo.findById(card.getId())).thenReturn(Optional.of(card));
+        when(cardRepo.save(card)).thenAnswer(i -> i.getArgument(0));
+
+        cardService.activateCard(card.getId());
+
+        assertEquals(CardStatus.ACTIVE, card.getStatus());
+    }
+
+    @Test
+    void deleteCard_success() {
+        Card card = new Card();
+        card.setId(UUID.randomUUID());
+        card.setStatus(CardStatus.ACTIVE);
+        when(cardRepo.findById(card.getId())).thenReturn(Optional.of(card));
+        when(cardRepo.save(card)).thenAnswer(i -> i.getArgument(0));
+
+        cardService.deleteCard(card.getId());
+
+        assertEquals(CardStatus.DELETED, card.getStatus());
+    }
 }

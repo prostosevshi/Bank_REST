@@ -74,4 +74,50 @@ public class TransferServiceTest {
                 transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(2000), "testuser"));
         assertEquals("Insufficient funds", ex.getMessage());
     }
+
+    @Test
+    void transfer_toSameCard_throws() {
+        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                transferService.transfer(fromCard.getId(), fromCard.getId(), BigDecimal.valueOf(100), "testuser"));
+
+        assertEquals("Cannot transfer to the same card", ex.getMessage());
+    }
+
+    @Test
+    void transfer_fromInactiveCard_throws() {
+        fromCard.setStatus(CardStatus.BLOCKED);
+        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
+        when(cardRepo.findById(toCard.getId())).thenReturn(Optional.of(toCard));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(100), "testuser"));
+
+        assertEquals("Both cards must be active", ex.getMessage());
+    }
+
+    @Test
+    void transfer_toInactiveCard_throws() {
+        toCard.setStatus(CardStatus.BLOCKED);
+        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
+        when(cardRepo.findById(toCard.getId())).thenReturn(Optional.of(toCard));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(100), "testuser"));
+
+        assertEquals("Both cards must be active", ex.getMessage());
+    }
+
+    @Test
+    void transfer_fromOtherUser_throws() {
+        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
+        when(cardRepo.findById(toCard.getId())).thenReturn(Optional.of(toCard));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(100), "hacker"));
+
+        assertEquals("You can only transfer from your own card", ex.getMessage());
+    }
+
 }
