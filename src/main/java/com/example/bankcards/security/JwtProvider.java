@@ -10,6 +10,10 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
+/**
+ * Provides utility methods for generating and validating JWT tokens.
+ * Handles signing, expiration, and parsing of JWTs.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
@@ -23,11 +27,22 @@ public class JwtProvider {
     @Value("${jwt.issuer}")
     private String jwtIssuer;
 
+    /**
+     * Returns the signing key used for JWT token generation and validation.
+     *
+     * @return the Key used for signing
+     */
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /**
+     * Generates a JWT token for the specified username.
+     *
+     * @param username the username to include in the token subject
+     * @return the generated JWT token string
+     */
     public String generateToken(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationSec * 1000);
@@ -40,6 +55,12 @@ public class JwtProvider {
                 .compact();
     }
 
+    /**
+     * Extracts the username from the JWT token.
+     *
+     * @param token the JWT token
+     * @return the username contained in the token
+     */
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -49,6 +70,12 @@ public class JwtProvider {
                 .getSubject();
     }
 
+    /**
+     * Validates the given JWT token.
+     *
+     * @param token the JWT token to validate
+     * @return true if valid, false if not
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);

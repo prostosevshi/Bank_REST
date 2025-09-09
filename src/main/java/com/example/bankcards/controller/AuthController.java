@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * AuthController provides REST endpoints for user authentication and registration.
+ * Supports login with JWT token generation and user registration with role assignment.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -31,6 +35,12 @@ public class AuthController {
     private final RoleRepo roleRepo;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Authenticates a user and generates a JWT token.
+     *
+     * @param request LoginRequest containing username and password
+     * @return AuthResponse containing a JWT token if authentication succeeds
+     */
     @Operation(
             summary = "Authenticate user and generate JWT",
             description = "Accepts username and password, verifies credentials, and returns a JWT token for authorized access."
@@ -44,6 +54,12 @@ public class AuthController {
         return new AuthResponse(token);
     }
 
+    /**
+     * Registers a new user account.
+     *
+     * @param request RegisterRequest containing username and password
+     * @return success or error message as String
+     */
     @Operation(
             summary = "Register a new user",
             description = "Creates a new user account with a username, password, and role. Returns user details without password."

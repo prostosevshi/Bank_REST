@@ -12,6 +12,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+
+/**
+ * Security configuration for the Bank_REST application.
+ * Configures HTTP security, password encoding, authentication manager and JWT authentication filter.
+ * Enables method-level security using @PreAuthorize and @PostAuthorize annotations.
+ */
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
@@ -19,6 +25,13 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    /**
+     * Configures the security filter chain for HTTP requests.
+     *
+     * @param http the HttpSecurity to configure
+     * @return the configured SecurityFilterChain
+     * @throws Exception if any error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -36,11 +49,23 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Provides a BCrypt password encoder for hashing user passwords.
+     *
+     * @return the PasswordEncoder bean
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Exposes the AuthenticationManager bean for use in authentication operations.
+     *
+     * @param config the AuthenticationConfiguration provided by Spring
+     * @return the AuthenticationManager bean
+     * @throws Exception if the authentication manager cannot be built
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

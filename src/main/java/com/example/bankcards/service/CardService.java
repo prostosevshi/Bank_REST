@@ -13,8 +13,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Service class for managing bank cards.
+ * Provides functionality to create, retrieve, update, delete, block, and activate cards.
+ */
 @Service
 @RequiredArgsConstructor
 public class CardService {
@@ -22,6 +27,13 @@ public class CardService {
     private final CardRepo cardRepo;
     private final UserRepo userRepo;
 
+    /**
+     * Creates a new card for a user.
+     *
+     * @param request the CardRequest containing card details
+     * @return the created Card entity
+     * @throws RuntimeException if the user is not found
+     */
     public Card createCard(CardRequest request) {
         User user = userRepo.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -37,6 +49,13 @@ public class CardService {
         return cardRepo.save(card);
     }
 
+    /**
+     * Retrieves a card by its ID.
+     *
+     * @param id the UUID of the card
+     * @return the Card entity
+     * @throws RuntimeException if the card is not found
+     */
     public Card getCard(UUID id) {
         Card card = cardRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
@@ -48,6 +67,15 @@ public class CardService {
         return card;
     }
 
+    /**
+     * Retrieves paginated cards belonging to a specific user.
+     *
+     * @param username the username of the card owner
+     * @param page     the page number
+     * @param size     the page size
+     * @return a Page of Card entities excluding deleted cards
+     * @throws RuntimeException if the user is not found
+     */
     public Page<Card> getCardsByUser(String username, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("expiry").descending());
 
@@ -57,30 +85,63 @@ public class CardService {
         return cardRepo.findAllByUserAndStatusNot(user, CardStatus.DELETED, pageable);
     }
 
+    /**
+     * Retrieves paginated cards by their status.
+     *
+     * @param status the CardStatus to filter
+     * @param page   the page number
+     * @param size   the page size
+     * @return a Page of Card entities
+     */
     public Page<Card> getCardsByStatus(CardStatus status, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("expiry").descending());
         return cardRepo.findAllByStatus(status, pageable);
     }
 
-    public Card updateCard(Card card) {
-        return cardRepo.save(card);
-    }
-
+    /**
+     * Marks a card as deleted.
+     *
+     * @param id the UUID of the card
+     */
     public void deleteCard(UUID id) {
         Card card = getCard(id);
         card.setStatus(CardStatus.DELETED);
         cardRepo.save(card);
     }
 
+    /**
+     * Blocks a card.
+     *
+     * @param id the UUID of the card
+     */
     public void blockCard(UUID id) {
         Card card = getCard(id);
         card.setStatus(CardStatus.BLOCKED);
         cardRepo.save(card);
     }
 
+    /**
+     * Activates a card.
+     *
+     * @param id the UUID of the card
+     */
     public void activateCard(UUID id) {
         Card card = getCard(id);
         card.setStatus(CardStatus.ACTIVE);
         cardRepo.save(card);
+    }
+
+    /**
+     * Updates the card status to EXPIRED if the expiry date has passed.
+     *
+     * @param card the Card to check
+     * @return the updated Card entity
+     */
+    public Card updateCardStatusIfExpired(Card card) {
+        if (card.getStatus() != CardStatus.EXPIRED && card.getExpiry().isBefore(LocalDate.now())) {
+            card.setStatus(CardStatus.EXPIRED);
+            cardRepo.save(card);
+        }
+        return card;
     }
 }

@@ -11,6 +11,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+/**
+ * DataInitializer is a Spring component that initializes default roles and an admin user
+ * in the system at application startup.
+ */
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
@@ -20,6 +24,13 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
 
+    /**
+     * Runs the data initialization process at application startup.
+     * Ensures that roles "ADMIN" and "USER" exist, and creates an admin user
+     * with username "admin" and password "admin" if it doesn't already exist.
+     *
+     * @param args
+     */
     @Override
     public void run(String... args) {
         Role adminRole = roleRepo.findByName("ADMIN")

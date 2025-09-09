@@ -6,12 +6,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
+/**
+ * Custom implementation of UserDetailsService for Spring Security.
+ * Loads user details from the database by username and maps roles to authorities.
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
     private final UserRepo userRepo;
 
+    /**
+     * Locates the user based on the username.
+     *
+     * @param username the username identifying the user whose data is required.
+     * @return a filled UserDetails object
+     * @throws UsernameNotFoundException if the user could not be found
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepo.findByUsername(username)

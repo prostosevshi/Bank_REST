@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+/**
+ * TransferController provides REST endpoints for performing money transfers between cards.
+ * Only authenticated users can transfer money, and transfers are restricted to the user's active cards.
+ */
 @RestController
 @RequestMapping("/api/transfers")
 @RequiredArgsConstructor
@@ -29,6 +33,19 @@ public class TransferController {
 
     private final TransferService transferService;
 
+    /**
+     * Makes a money transfer between two cards owned by the authenticated user.
+     * The transfer is only allowed if:
+     * <ul>
+     *     <li>The source card belongs to the authenticated user</li>
+     *     <li>The source card is active</li>
+     *     <li>Sufficient funds are available</li>
+     * </ul>
+     *
+     * @param request TransferRequest containing from card ID, to card ID, and transfer amount
+     * @return TransferResponse with transfer details
+     * @throws RuntimeException if validation fails
+     */
     @Operation(
             summary = "Make a transfer between cards",
             description = "Allows a user to transfer money from one of their active cards to another card they own."
