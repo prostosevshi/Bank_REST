@@ -52,10 +52,15 @@ public class TransferServiceTest {
         toCard.getUser().setUsername("otheruser");
     }
 
+    private void mockBothCards() {
+        when(cardRepo.findByIdForUpdate(fromCard.getId())).thenReturn(Optional.of(fromCard));
+        when(cardRepo.findByIdForUpdate(toCard.getId())).thenReturn(Optional.of(toCard));
+    }
+
     @Test
     void transfer_success() {
-        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
-        when(cardRepo.findById(toCard.getId())).thenReturn(Optional.of(toCard));
+        mockBothCards();
+
         when(transferRepo.save(any(Transfer.class))).thenAnswer(i -> i.getArgument(0));
 
         TransferResponse result = transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(200), "testuser");
@@ -67,8 +72,7 @@ public class TransferServiceTest {
 
     @Test
     void transfer_insufficientFunds() {
-        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
-        when(cardRepo.findById(toCard.getId())).thenReturn(Optional.of(toCard));
+        mockBothCards();
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(2000), "testuser"));
@@ -77,7 +81,8 @@ public class TransferServiceTest {
 
     @Test
     void transfer_toSameCard_throws() {
-        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
+        when(cardRepo.findByIdForUpdate(fromCard.getId())).thenReturn(Optional.of(fromCard));
+        when(cardRepo.findByIdForUpdate(toCard.getId())).thenReturn(Optional.of(fromCard));
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 transferService.transfer(fromCard.getId(), fromCard.getId(), BigDecimal.valueOf(100), "testuser"));
@@ -88,8 +93,7 @@ public class TransferServiceTest {
     @Test
     void transfer_fromInactiveCard_throws() {
         fromCard.setStatus(CardStatus.BLOCKED);
-        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
-        when(cardRepo.findById(toCard.getId())).thenReturn(Optional.of(toCard));
+        mockBothCards();
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(100), "testuser"));
@@ -100,8 +104,7 @@ public class TransferServiceTest {
     @Test
     void transfer_toInactiveCard_throws() {
         toCard.setStatus(CardStatus.BLOCKED);
-        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
-        when(cardRepo.findById(toCard.getId())).thenReturn(Optional.of(toCard));
+        mockBothCards();
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(100), "testuser"));
@@ -111,8 +114,7 @@ public class TransferServiceTest {
 
     @Test
     void transfer_fromOtherUser_throws() {
-        when(cardRepo.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
-        when(cardRepo.findById(toCard.getId())).thenReturn(Optional.of(toCard));
+        mockBothCards();
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 transferService.transfer(fromCard.getId(), toCard.getId(), BigDecimal.valueOf(100), "hacker"));
