@@ -3,10 +3,15 @@ package com.example.bankcards.repository;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.CardStatus;
 import com.example.bankcards.entity.User;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -33,4 +38,15 @@ public interface CardRepo extends JpaRepository<Card, UUID> {
      * @return a page of cards for the user excluding the given status
      */
     Page<Card> findAllByUserAndStatusNot(User user, CardStatus status, Pageable pageable);
+
+    /**
+     * Finds a card by its ID with a pessimistic write lock.
+     *
+     * @param id the unique identifier of the card
+     * @return an Optional containing the card if found, otherwise empty
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select c from Card c where c.id = :id")
+    Optional<Card> findByIdForUpdate(@Param("id") UUID id);
+
 }

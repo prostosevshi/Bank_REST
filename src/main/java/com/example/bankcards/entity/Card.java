@@ -66,6 +66,12 @@ public class Card {
     private String last4;
 
     /**
+     * Version field for optimistic locking.
+     */
+    @Version
+    private Long version;
+
+    /**
      * Method to initialize default values before saving to the database.
      */
     @PrePersist

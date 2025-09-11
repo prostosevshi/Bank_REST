@@ -2,6 +2,7 @@ package com.example.bankcards.service;
 
 import com.example.bankcards.dto.TransferResponse;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.CardStatus;
 import com.example.bankcards.entity.Transfer;
 import com.example.bankcards.repository.CardRepo;
 import com.example.bankcards.repository.TransferRepo;
@@ -26,32 +27,26 @@ public class TransferService {
     /**
      * Transfers money from one card to another.
      *
-     * @param fromCardId the UUID of the from card
-     * @param toCardId   the UUID of the to card
-     * @param amount     the amount to transfer, must be greater than zero
-     * @param username   the username of the authenticated user performing the transfer
+     * @param fromCardId the UUID of the source card
+     * @param toCardId the UUID of the target card
+     * @param amount the transfer amount
+     * @param username the username of the user initiating the transfer
      * @return a TransferResponse containing details of the completed transfer
-     * @throws RuntimeException if:
-     *                          <ul>
-     *                          <li>Amount is zero or negative</li>
-     *                          <li>Either card is not found</li>
-     *                          <li>Either card is not ACTIVE</li>
-     *                          <li>User does not own the source card</li>
-     *                          <li>Attempting to transfer to the same card</li>
-     *                          <li>Insufficient funds on the source card</li>
-     *                          </ul>
+     * @throws RuntimeException if any validation fails
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public TransferResponse transfer(UUID fromCardId, UUID toCardId, BigDecimal amount, String username) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new RuntimeException("amount must be greater than zero");
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Amount must be greater than zero");
+        }
 
-        Card fromCard = cardRepo.findById(fromCardId)
+        Card fromCard = cardRepo.findByIdForUpdate(fromCardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
-        Card toCard = cardRepo.findById(toCardId)
+        Card toCard = cardRepo.findByIdForUpdate(toCardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
 
-        if (!fromCard.getStatus().equals(com.example.bankcards.entity.CardStatus.ACTIVE)
-                || !toCard.getStatus().equals(com.example.bankcards.entity.CardStatus.ACTIVE)) {
+        if (!fromCard.getStatus().equals(CardStatus.ACTIVE)
+                || !toCard.getStatus().equals(CardStatus.ACTIVE)) {
             throw new RuntimeException("Both cards must be active");
         }
 
