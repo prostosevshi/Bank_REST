@@ -1,6 +1,6 @@
-# Система управления банковскими картами
+# Bank Card Management System
 
-## Технологии
+## Technologies
 - Java 17+
 - Spring Boot (Web, Security, Data JPA)
 - PostgreSQL
@@ -10,25 +10,32 @@
 - Docker / Docker Compose
 - JUnit / Mockito
 
-## Запуск проекта
+## Getting Started
 
-### 1. Клонирование репозитория
-git clone https://github.com/<your-username>/bank-rest.git
+### 1. Clone the repository
+git clone https://github.com/your-username/bank-rest.git
 
-### 2. Запуск базы данных
+### 2. Start the database
 docker-compose up -d
 
-### 3. Запуск приложения
+### 3. Run the application
 ./mvnw spring-boot:run
 
-### После запуска можно открыть Swagger UI:
+### After the application starts, you can open Swagger UI:
 http://localhost:8080/swagger-ui/index.html
 
-Там можно протестировать все эндпоинты без Postman.
+You can test all endpoints there without Postman.
 
-- /api/auth/login – вход в систему
-- /api/auth/register – регистрация
-- /api/cards – управление картами
-- /api/transfers – переводы между картами
+- /api/auth/login – user login
+- /api/auth/register – user registration
+- /api/cards – manage bank cards
+- /api/transfers – money transfers between cards
 
-### Для использования ADMIN команд необходим токен, который можно получить при выполнении логина в админ аккаунт - логин: admin, пароль: admin
+### Admin Access
+Some endpoints require ADMIN role.
+To log in as admin use:
+
+- username: admin
+- password: admin
+
+Once logged in, copy the received JWT token and use it in the Authorize button in Swagger UI.
